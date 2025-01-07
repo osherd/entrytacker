@@ -25,6 +25,10 @@ jobs:
       - name: Run the application
         run: |
           python app.py
+      - name: Run tests
+        run: |
+          curl http://localhost:5000
+
       - name: install docker-compose
         run: |
           sudo apt-get update
