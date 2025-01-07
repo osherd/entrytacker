@@ -24,7 +24,7 @@ jobs:
       #Run the application (outside of a container)
       - name: Run the application
         run: |
-          python app.py
+          python app.py port=5000
       - name: Run tests
         run: |
           curl http://localhost:5000
