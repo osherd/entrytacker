@@ -21,6 +21,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      #Run the application (outside of a container)
+      - name: Run the application
+        run: |
+          python app.py
       - name: install docker-compose
         run: |
           sudo apt-get update
