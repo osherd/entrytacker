@@ -21,12 +21,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run tests
-        run: python -m pytest
-      - name: Build docker image
-        run: docker build -t entrytracker .
-      - name: Run docker container
-        run: docker run -d -p 5000:5000 entrytracker
+      - name: Docker Compose Setup
+        run: |
+          docker-compose up -d
       - name: Run curl tests
         run: |
           sleep 5
