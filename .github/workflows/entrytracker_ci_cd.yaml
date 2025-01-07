@@ -22,9 +22,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       #Run the application (outside of a container)
-      - name: Run the application
+      - name: Run the application on port 5000 in the background
         run: |
-          python app.py port=5000
+          nohup python app.py &
+        # run: |
+        #   python  nohup app.py
+        # run: |
+        #   python app.py port=5000
       - name: Run tests
         run: |
           curl http://localhost:5000
