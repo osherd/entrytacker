@@ -60,8 +60,8 @@ jobs:
           sudo apt-get install -y docker-compose
 
       # Package the application
-      - name: Package the application into a Docker container
-        run: docker build -t entry-tracker:latest .
+      - name: Build Docker image using new_tag output
+        run: docker build -t entry-tracker:${{ steps.increment_version.outputs.new_tag }} .
 
         # Find the process using port 5000 and kill it
       - name: Kill the process using port 5000
@@ -86,10 +86,9 @@ jobs:
       - name: Authenticate Docker to AWS ECR
         run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
 
-      # step 3: Tag Docker image
-      # Tag Docker image
-      - name: Tag Docker image
-        run: docker tag entry-tracker:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
+      # step 3: Tag Docker image using new_tag output
+      - name: Tag Docker image using new_tag output
+        run: docker tag entry-tracker:${{ steps.increment_version.outputs.new_tag }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
 
       # step 4: Push Docker image to ECR
       - name: Push Docker image to ECR
