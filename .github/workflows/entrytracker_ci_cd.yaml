@@ -15,20 +15,27 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get the latest tag from the repository and increment patch version
-        id: get_tag
+        id: increment_version
         run: |
           # Fetch tags from the main branch
           git fetch --tags
-
-          # Get the latest tag from the repository
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "Latest tag is $latest_tag"
-          IFS='.' read -r -a version <<< "$latest_tag"
-          echo "Version is ${version[0]}.${version[1]}.${version[2]}"
-          new_patch_version=$((${version[2]} + 1))
-          echo "New patch version is $new_patch_version"
-          new_tag="${version[0]}.${version[1]}.$new_patch_version"
-          echo "New tag is $new_tag"
+          # Get the latest tag (sorted to get the most recent version)
+          latest_tag=$(git tag -l "v*" | sort -V | tail -n 1)
+          # If no tags are found, set the version to 1.0.0
+           if [ -z "$latest_tag" ]; then
+          new_tag="1.0.0"
+          else
+          # Extract major, minor, patch from the latest tag
+          major=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')  # Remove 'v' if present
+          minor=$(echo $latest_tag | cut -d '.' -f 2)
+          patch=$(echo $latest_tag | cut -d '.' -f 3)
+          # Increment the patch number by 1
+          patch=$((patch + 1))
+          # Form the new tag
+          new_tag="${major}.${minor}.${patch}"
+          fi
+          echo "New version tag: $new_tag"
+          # Set the new version as output for later use
           echo "::set-output name=new_tag::$new_tag"
 
       - name: Set up python 3.10
