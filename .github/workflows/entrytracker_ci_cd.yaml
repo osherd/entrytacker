@@ -81,6 +81,7 @@ jobs:
 
       - name: Create a new tag in the repository
         run: git tag -a ${{ steps.increment_version.outputs.new_tag }} -m "version ${{ steps.increment_version.outputs.new_tag }}"
+
       - name: Push the new tag to the repository
         run: git push origin ${{ steps.increment_version.outputs.new_tag }}
 
