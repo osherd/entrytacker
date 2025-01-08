@@ -38,16 +38,22 @@ jobs:
       # Package the application
       - name: Package the application into a Docker container
         run: docker build -t entrytracker:latest .
+
+        # Find the process using port 5000 and kill it
+      - name: Kill the process using port 5000
+        run: |
+          sudo lsof -t -i:5000 | xargs kill -9
+
       - name: Run the application in a container
         run: docker run -d -p 5000:5000 entrytracker:latest
       - name: Run tests
         run: |
           sleep 5
           curl http://localhost:5000
-      # Find the process using port 5000 and kill it
-      - name: Kill the process using port 5000
-        run: |
-          sudo lsof -t -i:5000 | xargs kill -9
+      # # Find the process using port 5000 and kill it
+      # - name: Kill the process using port 5000
+      #   run: |
+      #     sudo lsof -t -i:5000 | xargs kill -9
       # - name: install docker-compose
       #   run: |
       #     sudo apt-get update
