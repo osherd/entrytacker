@@ -24,32 +24,33 @@ jobs:
       - name: Get the latest tag from the repository and increment patch version
         id: increment_version
         run: |
-          version="${{ steps.increment_version.outputs.new_tag }}"
-          IFS='.' read -r major minor patch <<< "$version"
-          new_patch=$((patch + 1))
-          new_version="$major.$minor.$new_patch"
-          echo "$new_version"
+          # Fetch tags from the main branch
+          git fetch --tags
+          # Get the latest tag (sorted to get the most recent version)
+          latest_tag=$(git tag -l "v*" | sort -V | tail -n 1)
+          # If no tags are found, set the version to 1.0.0
+           if [ -z "$latest_tag" ]; then
+          new_tag="1.0.0"
+          else
 
-          # # Fetch tags from the main branch
-          # git fetch --tags
-          # # Get the latest tag (sorted to get the most recent version)
-          # latest_tag=$(git tag -l "v*" | sort -V | tail -n 1)
-          # # If no tags are found, set the version to 1.0.0
-          #  if [ -z "$latest_tag" ]; then
-          # new_tag="1.0.0"
-          # else
-          # # Extract major, minor, patch from the latest tag
+          # Extract major, minor, patch from the latest tag
           # major=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')  # Remove 'v' if present
           # minor=$(echo $latest_tag | cut -d '.' -f 2)
           # patch=$(echo $latest_tag | cut -d '.' -f 3)
-          # # Increment the patch number by 1
-          # patch=$((patch + 1))
-          # # Form the new tag
-          # new_tag="${major}.${minor}.${patch}"
-          # fi
-          # echo "New version tag: $new_tag"
-          # # Set the new version as output for later use
-          # echo "::set-output name=new_tag::$new_tag"
+
+
+          IFS='.' read -r major minor patch <<< "${latest_tag#v}"
+          echo "Major: $major, Minor: $minor, Patch: $patch"
+
+
+          # Increment the patch number by 1
+          patch=$((patch + 1))
+          # Form the new tag
+          new_tag="${major}.${minor}.${patch}"
+          fi
+          echo "New version tag: $new_tag"
+          # Set the new version as output for later use
+          echo "::set-output name=new_tag::$new_tag"
       # - name: increment the new_tag by 1
       #   run: echo ${{ steps.increment_version.outputs.new_tag }}
 
