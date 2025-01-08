@@ -25,22 +25,34 @@ jobs:
       - name: Run the application on port 5000 in the background
         run: |
           nohup python app.py &
-        # run: |
-        #   python  nohup app.py
-        # run: |
-        #   python app.py port=5000
       - name: Run tests
         run: |
           curl http://localhost:5000
 
+      # install docker-compose
       - name: install docker-compose
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
-      - name: Docker Compose Setup
-        run: |
-          docker-compose up -d
-      - name: Run curl tests
+
+      # Package the application
+      - name: Package the application into a Docker container
+        run: docker build -t entrytracker:latest .
+      - name: Run the application in a container
+        run: docker run -d -p 5000:5000 entrytracker:latest
+      - name: Run tests
         run: |
           sleep 5
           curl http://localhost:5000
+
+      # - name: install docker-compose
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y docker-compose
+      # - name: Docker Compose Setup
+      #   run: |
+      #     docker-compose up -d
+      # - name: Run curl tests
+      #   run: |
+      #     sleep 5
+      #     curl http://localhost:5000
