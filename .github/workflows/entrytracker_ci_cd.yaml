@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - main
+permissions:
+  contents: write # Ensure the GitHub Actions token has write access to the repository
 jobs:
   build:
     runs-on: ubuntu-latest
