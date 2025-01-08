@@ -22,25 +22,15 @@ jobs:
           # Fetch tags from the main branch
           git fetch --tags
           # Get the latest tag (sorted to get the most recent version)
+          git fetch --tags
           latest_tag=$(git tag --sort=-v:refname | head -n 1)
-          # If no tags are found, set the version to 1.0.0
-           if [ -z "$latest_tag" ]; then
-          new_tag="1.0.0"
-          else
-          # Extract major, minor, patch from the latest tag
-          major=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')  # Remove 'v' if present
-          minor=$(echo $latest_tag | cut -d '.' -f 2)
-          patch=$(echo $latest_tag | cut -d '.' -f 3)
-          # Increment the patch number by 1
+          new_tag=${latest_tag:-v1.0.0}
+          new_tag=${new_tag#v}  # Remove 'v' if present
+          IFS='.' read -r major minor patch <<< "$new_tag"
           patch=$((patch + 1))
-          # Form the new tag
           new_tag="${major}.${minor}.${patch}"
-          fi
           echo "New version tag: $new_tag"
-          # Set the new version as output for later use
           echo "::set-output name=new_tag::$new_tag"
-      # - name: increment the new_tag by 1
-      #   run: echo ${{ steps.increment_version.outputs.new_tag }}
 
       - name: Set up python 3.10
         uses: actions/setup-python@v2
