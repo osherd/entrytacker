@@ -72,6 +72,11 @@ jobs:
       - name: Build Docker image using new_tag output
         run: docker build -t entry-tracker:${{ steps.increment_version.outputs.new_tag }} .
 
+      - name: Set up Git user
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
       - name: Create a new tag in the repository
         run: git tag -a ${{ steps.increment_version.outputs.new_tag }} -m "version ${{ steps.increment_version.outputs.new_tag }}"
       - name: Push the new tag to the repository
