@@ -44,6 +44,8 @@ jobs:
           echo "New version tag: $new_tag"
           # Set the new version as output for later use
           echo "::set-output name=new_tag::$new_tag"
+      - name: increment the new_tag by 1
+        run: echo ${{ steps.increment_version.outputs.new_tag }}
 
       - name: Set up python 3.10
         uses: actions/setup-python@v2
@@ -72,8 +74,7 @@ jobs:
 
       - name: get latest build version of the image
         run: docker images | grep entry-tracker
-      - name: increment the version of the image  to be ${{ steps.increment_version.outputs.new_tag }} + ${{ steps.increment_version.outputs.new_tag + 1 }}
-        run: docker tag entry-tracker:${{ steps.increment_version.outputs.new_tag }} entry-tracker:${{ steps.increment_version.outputs.new_tag + 1 }}
+      - name: increment the version of the image  to be ${{ steps.increment_version.outputs.new_tag }} + ${{ steps.increment_version.outputs.new_tag + }}
 
         # Find the process using port 5000 and kill it
       - name: Kill the process using port 5000
