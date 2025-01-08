@@ -32,17 +32,10 @@ jobs:
            if [ -z "$latest_tag" ]; then
           new_tag="1.0.0"
           else
-
           # Extract major, minor, patch from the latest tag
-          # major=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')  # Remove 'v' if present
-          # minor=$(echo $latest_tag | cut -d '.' -f 2)
-          # patch=$(echo $latest_tag | cut -d '.' -f 3)
-
-
-          IFS='.' read -r major minor patch <<< "${latest_tag#v}"
-          echo "Major: $major, Minor: $minor, Patch: $patch"
-
-
+          major=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')  # Remove 'v' if present
+          minor=$(echo $latest_tag | cut -d '.' -f 2)
+          patch=$(echo $latest_tag | cut -d '.' -f 3)
           # Increment the patch number by 1
           patch=$((patch + 1))
           # Form the new tag
@@ -82,7 +75,8 @@ jobs:
       - name: get latest build version of the image
         run: docker images | grep entry-tracker
       - name: increament only minor version of the image by 1
-        run: echo $(( ${{ steps.increment_version.outputs.new_tag }} + 1 ))
+        run: echo $(( ${{ steps.increment_version.outputs.patch +1 }}))
+
         # run: echo $(( ${{ steps.increment_version.outputs.new_tag }} + 1 ))
       # - name: increment the version of the image
       #   run: echo $(( ${{ steps.increment_version.outputs.new_tag }} + 1 ))
