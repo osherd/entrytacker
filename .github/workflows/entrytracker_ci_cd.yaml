@@ -74,7 +74,8 @@ jobs:
 
       - name: get latest build version of the image
         run: docker images | grep entry-tracker
-      - name: increment the version of the image  to be ${{ steps.increment_version.outputs.new_tag }} + ${{ steps.increment_version.outputs.new_tag + }}
+      - name: increment the version of the image
+        run: echo $(( ${{ steps.increment_version.outputs.new_tag }} + 1 ))
 
         # Find the process using port 5000 and kill it
       - name: Kill the process using port 5000
