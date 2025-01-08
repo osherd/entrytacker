@@ -104,7 +104,6 @@ jobs:
       # step 4: Push Docker image to ECR
       - name: Push Docker image to ECR registry using new_tag output
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
-        # run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
       - name: Connect to EC2 instance
         run: ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
       - name: Pull the latest image from ECR
