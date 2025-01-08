@@ -91,8 +91,9 @@ jobs:
         run: docker tag entry-tracker:${{ steps.increment_version.outputs.new_tag }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
 
       # step 4: Push Docker image to ECR
-      - name: Push Docker image to ECR
-        run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
+      - name: Push Docker image to ECR registry using new_tag output
+        run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
+        # run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
 
       # step 5: Connect  to EC2 enstance and update the running container
       - name: Connect to EC2 instance and update the running container with latest version of the image
