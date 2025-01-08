@@ -14,12 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: get commit version from main branch
-        id: get_commit_version
-        run: |
-          commit_version=$(git rev-parse --short HEAD)
-          echo "Commit version: $commit_version"
-          echo "::set-output name=commit_version::$commit_version"
+      # - name: get commit version from main branch
+      #   id: get_commit_version
+      #   run: |
+      #     commit_version=$(git rev-parse --short HEAD)
+      #     echo "Commit version: $commit_version"
+      #     echo "::set-output name=commit_version::$commit_version"
 
       - name: Get the latest tag from the repository and increment patch version
         id: increment_version
@@ -69,6 +69,11 @@ jobs:
       # Package the application
       - name: Build Docker image using new_tag output
         run: docker build -t entry-tracker:${{ steps.increment_version.outputs.new_tag }} .
+
+      - name: get latest build version of the image
+        run: docker images | grep entry-tracker
+      - name: increment the version of the image  to be ${{ steps.increment_version.outputs.new_tag }} + ${{ steps.increment_version.outputs.new_tag + 1 }}
+        run: docker tag entry-tracker:${{ steps.increment_version.outputs.new_tag }} entry-tracker:${{ steps.increment_version.outputs.new_tag + 1 }}
 
         # Find the process using port 5000 and kill it
       - name: Kill the process using port 5000
