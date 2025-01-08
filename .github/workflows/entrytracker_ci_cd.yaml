@@ -135,14 +135,19 @@ jobs:
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
         # run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
 
-      # step 5: Connect  to EC2 enstance and update the running container
+      # step 5: Connect to EC2 enstance and update the running container
       - name: Connect to EC2 instance and update the running container with latest version of the image
         run: |
-          chmod 400 ${{ secrets.EC2_PRIVATE_KEY }}
           ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
-          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
           docker-compose down
           docker-compose up -d
+        # run: |
+        #   # chmod 400 ${{ secrets.EC2_PRIVATE_KEY }}
+        #   ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
+        #   docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
+        #   docker-compose down
+        #   docker-compose up -d
         # run: |
         #   chmod 400 ${{ secrets.EC2_PRIVATE_KEY }}
         #   ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
