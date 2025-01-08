@@ -52,18 +52,24 @@ jobs:
           sleep 5
           curl http://localhost:5000
 
+      # Push the artifact to AWS ECR registry
+
+      # step 1: Configure AWS credentials
       - name: configure aws credentials
         run: aws configure set aws_access_key_id ${{ secrets.ECR_ACCESS_KEY }} && aws configure set aws_secret_access_key ${{ secrets.ECR_SECRET_KEY }} && aws configure set region ${{ secrets.AWS_REGION }}
 
+      # step 2: Authenticate Docker to AWS ECR
       - name: Authenticate Docker to AWS ECR
         run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
 
-        # run: aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+      # step 3: Tag Docker image
+      # Tag Docker image
+      - name: Tag Docker image
+        run: docker tag entry-tracker:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
 
-      # - name: Tag Docker image
-      #   run: docker tag entry-tracker:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
-      # - name: Push Docker image to ECR
-      #   run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
+      # step 4: Push Docker image to ECR
+      - name: Push Docker image to ECR
+        run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
 
       # - name: Push the artifact to AWS ECR registry
       #   run: |
