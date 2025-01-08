@@ -30,7 +30,7 @@ jobs:
           latest_tag=$(git tag -l "v*" | sort -V | tail -n 1)
           # If no tags are found, set the version to 1.0.0
            if [ -z "$latest_tag" ]; then
-          new_tag="1.0.0"
+          new_tag="v1.0.0"
           else
           # Extract major, minor, patch from the latest tag
           major=$(echo $latest_tag | cut -d '.' -f 1 | sed 's/v//')  # Remove 'v' if present
@@ -72,12 +72,17 @@ jobs:
       - name: Build Docker image using new_tag output
         run: docker build -t entry-tracker:${{ steps.increment_version.outputs.new_tag }} .
 
-      - name: get latest build version of the image
-        run: docker images | grep entry-tracker
-      - name: increament only minor version of the image by 1
-        run: echo $(( ${{ steps.increment_version.outputs.patch +1 }}))
+      - name: Create a new tag
+        run: git tag -a ${{ steps.increment_version.outputs.new_tag }} -m "version ${{ steps.increment_version.outputs.new_tag }}"
+      - name: Push the new tag to the repository
+        run: git push origin ${{ steps.increment_version.outputs.new_tag }}
 
-        # run: echo $(( ${{ steps.increment_version.outputs.new_tag }} + 1 ))
+      # - name: get latest build version of the image
+      # run: docker images | grep entry-tracker
+      # - name: increament only minor version of the image by 1
+      #   run: echo $(( ${{ steps.increment_version.outputs.new_tag }} + 1 ))
+
+      # run: echo $(( ${{ steps.increment_version.outputs.new_tag }} + 1 ))
       # - name: increment the version of the image
       #   run: echo $(( ${{ steps.increment_version.outputs.new_tag }} + 1 ))
 
