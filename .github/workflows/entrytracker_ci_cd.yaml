@@ -81,7 +81,7 @@ jobs:
           git config --global push.default simple
           git checkout main
 
-      - name: Create a new tag in the repository
+      - name: Create a new tag
         run: git tag -a ${{ steps.increment_version.outputs.new_tag }} -m "version ${{ steps.increment_version.outputs.new_tag }}"
 
       - name: Push the new tag
