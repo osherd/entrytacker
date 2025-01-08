@@ -8,11 +8,29 @@ on:
     branches:
       - main
 jobs:
-  build_application:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Get the latest tag from the repository and increment patch version
+        id: get_tag
+        run: |
+          # Fetch tags from the main branch
+          git fetch --tags
+
+          # Get the latest tag from the repository
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Latest tag is $latest_tag"
+          IFS='.' read -r -a version <<< "$latest_tag"
+          echo "Version is ${version[0]}.${version[1]}.${version[2]}"
+          new_patch_version=$((${version[2]} + 1))
+          echo "New patch version is $new_patch_version"
+          new_tag="${version[0]}.${version[1]}.$new_patch_version"
+          echo "New tag is $new_tag"
+          echo "::set-output name=new_tag::$new_tag"
+
       - name: Set up python 3.10
         uses: actions/setup-python@v2
         with:
@@ -29,10 +47,13 @@ jobs:
         run: |
           curl http://localhost:5000
 
-      # install docker-compose
-      - name: install docker-compose
+      - name: add docker and docker compose to runner
         run: |
           sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
+          sudo usermod -aG docker $USER
           sudo apt-get install -y docker-compose
 
       # Package the application
@@ -71,19 +92,25 @@ jobs:
       - name: Push Docker image to ECR
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
 
-      - name: Deploy to EC2 and  Update the running container
+      # step 5: Connect  to EC2 enstance and update the running container
+      - name: Connect to EC2 instance and update the running container with latest version of the image
         run: |
-          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
           chmod 400 ${{ secrets.EC2_PRIVATE_KEY }}
+          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
           docker-compose down
           docker-compose up -d
+        # run: |
+        #   chmod 400 ${{ secrets.EC2_PRIVATE_KEY }}
+        #   ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
+        #   docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
+        #   docker-compose down
+        #   docker-compose up -d
 
+      # - name:  Deploy to EC2 and  Update the running container
       #   run: |
-      #     ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets. }}@${{ secrets.EC2_PUBLIC_IP }}
       #     chmod 400 ${{ secrets.EC2_PRIVATE_KEY }}
+      #     ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
       #     docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:latest
-      # - name: Update the running container
-      #   run: |
       #     docker-compose down
       #     docker-compose up -d
