@@ -81,8 +81,16 @@ jobs:
 
       - name: Create a new tag in the repository
         run: git tag -a ${{ steps.increment_version.outputs.new_tag }} -m "version ${{ steps.increment_version.outputs.new_tag }}"
-      - name: Push the new tag to the repository and Permission to push the new tag
-        run: git push origin ${{ steps.increment_version.outputs.new_tag }}
+
+      - name: Push the new tag
+        run: |
+          # Push the new tag to the remote repository
+          git push origin "$new_tag"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Push the new tag to the repository and Permission to push the new tag
+      #   run: git push origin ${{ steps.increment_version.outputs.new_tag }}
 
       # - name: get latest build version of the image
       # run: docker images | grep entry-tracker
