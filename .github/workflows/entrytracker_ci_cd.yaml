@@ -112,9 +112,11 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            echo "$PRIVATE_KEY" > github-ec2.pem
-            chmod 600 github-ec2.pem
-            ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} <<EOF
+            # Use /tmp for writable temporary files
+            TEMP_KEY_PATH="/tmp/github-ec2.pem"
+            echo "$PRIVATE_KEY" > $TEMP_KEY_PATH
+            chmod 400 $TEMP_KEY_PATH
+            ssh -o StrictHostKeyChecking=no -i $TEMP_KEY_PATH ${USER}@${HOST} <<EOF
             echo "Current directory: $(pwd)"
             echo "Listing home directory:"
             ls ~
