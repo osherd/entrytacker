@@ -114,9 +114,11 @@ jobs:
           script: |
             echo "$PRIVATE_KEY" > github-ec2.pem
             chmod 400 github-ec2.pem
-            ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
+            ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} <<EOF
             echo "Current directory: $(pwd)"
             echo "Listing home directory:"
+            ls ~
+            EOF
         # run: ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
 
       - name: Pull the latest image from ECR
