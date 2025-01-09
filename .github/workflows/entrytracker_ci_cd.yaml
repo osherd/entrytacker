@@ -113,7 +113,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             # Use /tmp for writable temporary files
-            TEMP_KEY_PATH="/tmp/github-ec2.pem"
+            sudo bash -c 'echo "$PRIVATE_KEY" > /tmp/github-ec2.pem'
             echo "$PRIVATE_KEY" > $TEMP_KEY_PATH
             chmod 400 $TEMP_KEY_PATH
             ssh -T -o StrictHostKeyChecking=no -i $TEMP_KEY_PATH ${USER}@${HOST} <<EOF
