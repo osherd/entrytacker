@@ -135,7 +135,10 @@ jobs:
       - name: Stop the running container
         run: docker-compose down
       - name: Start the container with the latest image
-        run: docker-compose up -d
+        run: |
+          docker-compose up -d
+           sleep 5
+          curl http://localhost:5000
 
       # # step 5: Connect to EC2 enstance and update the running container
       # - name: Connect to EC2 instance and update the running container with latest version of the image
