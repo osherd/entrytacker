@@ -116,7 +116,7 @@ jobs:
             TEMP_KEY_PATH="/tmp/github-ec2.pem"
             echo "$PRIVATE_KEY" > $TEMP_KEY_PATH
             chmod 400 $TEMP_KEY_PATH
-            ssh -o StrictHostKeyChecking=no -i $TEMP_KEY_PATH ${USER}@${HOST} <<EOF
+            ssh -T -o StrictHostKeyChecking=no -i $TEMP_KEY_PATH ${USER}@${HOST} <<EOF
             echo "Current directory: $(pwd)"
             echo "Listing home directory:"
             ls ~
