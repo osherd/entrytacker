@@ -21,8 +21,6 @@ jobs:
         run: |
           # Fetch tags from the main branch
           git fetch --tags
-          # Get the latest tag (sorted to get the most recent version)
-          git fetch --tags
           latest_tag=$(git tag --sort=-v:refname | head -n 1)
           new_tag=${latest_tag:-v1.0.0}
           new_tag=${new_tag#v}  # Remove 'v' if present
@@ -57,7 +55,7 @@ jobs:
       - name: Build Docker image using new_tag output
         run: docker build -t entry-tracker:${{ steps.increment_version.outputs.new_tag }} .
 
-      - name: Set up Git user and Permission to push the new tag
+      - name: Set up Git user and Permission to push the new tag => (Private repository)
         run: |
           git config --global user.email "GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "${GITHUB_ACTOR}"
@@ -139,16 +137,3 @@ jobs:
           docker-compose up -d
            sleep 5
           curl http://localhost:5000
-
-      # # step 5: Connect to EC2 enstance and update the running container
-      # - name: Connect to EC2 instance and update the running container with latest version of the image
-      #   run: |
-      #     ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
-      #     docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
-      #     docker-compose down
-      #     docker-compose up -d
-      # run: |
-      #   ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
-      #   docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
-      #   docker-compose down
-      #   docker-compose up -d
