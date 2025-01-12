@@ -122,8 +122,10 @@ jobs:
 
       - name: Pull the latest image from ECR
         run: docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
-      - name: Stop the running container
+
+      - name: Stop the running container to update latest tag
         run: docker-compose down
+
       - name: Start the container with the latest image
         run: |
           docker-compose up -d
