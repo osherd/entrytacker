@@ -116,7 +116,7 @@ jobs:
           run: |
             echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
             ssh -o StrictHostKeyChecking=no -i $private_key ${USER}@${HOST}"
-            cd /home/${USER}/entryTracker
+            cd $PWD/entryTracker
 
       - name: configure aws credentials
         run: |
