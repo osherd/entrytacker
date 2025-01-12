@@ -117,18 +117,30 @@ jobs:
             echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
             ssh -o StrictHostKeyChecking=no -i $private_key ${USER}@${HOST}"
             cd /home/${USER}/entryTracker
-            sed -i "s|image:${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}:.*|image:${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}:${{ env.LATEST_TAG }}|g" docker-compose.yml
 
       - name: configure aws credentials
         run: |
           aws configure set aws_access_key_id ${{ secrets.ECR_ACCESS_KEY }} && aws configure set aws_secret_access_key ${{ secrets.ECR_SECRET_KEY }} && aws configure set region ${{ secrets.AWS_REGION }}
           # step 2: Authenticate Docker to AWS ECR registry
           aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
-          # # Export Environment variables
-          # export DB_HOST=${DB_HOST}
-          # eport DB_USER=${DB_USER}
-          # export DB_PASSWORD=${DB_PASSWORD}
-          # export DB_NAME=${DB_NAME}
+
+      # Fetch the latest ECR image tag
+      - name: Get latest ECR image tag
+        id: get-latest-tag
+        run: |
+          REPO_NAME="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker"
+          LATEST_TAG=$(aws ecr describe-images --repository-name $REPO_NAME \
+            --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
+          echo "Latest tag: $LATEST_TAG"
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      # Step 4: Update docker-compose.yml
+      - name: Update docker-compose.yml
+        run: |
+          ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
+          REGION=${{ secrets.AWS_REGION }}
+          REPO_NAME="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker"
+          sed -i "s|image: .*|image: $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:${{ env.LATEST_TAG }}|g" docker-compose.yml
 
       - name: Pull the latest image from ECR
         run: docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
