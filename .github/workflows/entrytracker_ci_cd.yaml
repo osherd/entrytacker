@@ -117,6 +117,7 @@ jobs:
             echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
             ssh -o StrictHostKeyChecking=no -i $private_key ${USER}@${HOST}"
             cd /home/${USER}/entryTracker
+            sed -i "s|image:${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}:.*|image:${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}:${{ env.LATEST_TAG }}|g" docker-compose.yml
 
       - name: configure aws credentials
         run: |
