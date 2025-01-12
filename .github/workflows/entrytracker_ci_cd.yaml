@@ -107,15 +107,16 @@ jobs:
         uses: appleboy/ssh-action@v0.1.5
         env:
           PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
-          HOSTNAME: ${{ secrets.EC2_HOST }}
-          USER_NAME: ${{ secrets.EC2_USER }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
           run: |
             echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-             ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-
-             # echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-             # ssh -o StrictHostKeyChecking=no -i $private_key ${USER}@${HOST}"
-             # cd /home/ubuntu/entryTracker
+            ssh -o StrictHostKeyChecking=no -i $private_key ${USER}@${HOST}"
+            cd /home/${USER}/entryTracker
 
       - name: configure aws credentials
         run: |
