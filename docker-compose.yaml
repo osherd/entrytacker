@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    container_name: flask-app
+    container_name: entry-tracker-app
     environment:
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}

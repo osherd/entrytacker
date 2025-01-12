@@ -76,7 +76,7 @@ def home():
         connection.close()
 
         return jsonify({
-            "message": "Data fetched successfully from the database -test osher.",
+            "message": "Data fetched successfully from the database ",
             "current_entry": current_entry,
             "previous_entries": previous_entries
         })
