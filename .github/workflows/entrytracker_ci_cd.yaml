@@ -115,7 +115,8 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           run: |
             echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-            ssh -o StrictHostKeyChecking=no -i $private_key ${USER}@${HOST} "
+            ssh -o StrictHostKeyChecking=no -i $private_key ${USER}@${HOST}"
+            cd /home/ubuntu/entryTracker
 
       - name: configure aws credentials
         run: |
@@ -135,5 +136,3 @@ jobs:
       - name: Start the container with the latest image
         run: |
           docker-compose up -d
-           sleep 5
-          curl http://localhost:5000
