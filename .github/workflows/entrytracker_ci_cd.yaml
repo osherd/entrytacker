@@ -74,7 +74,7 @@ jobs:
           docker-compose up -d
       - name: Run curl tests
         run: |
-          sleep 20
+          sleep 50
           curl http://localhost:5000
       # Push the artifact to AWS ECR registry
       # step 1: Configure AWS credentials
