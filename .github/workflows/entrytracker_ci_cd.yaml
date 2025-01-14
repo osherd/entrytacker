@@ -114,8 +114,8 @@ jobs:
             ssh -o StrictHostKeyChecking=no -i $private_key ${USER}@${HOST}"
             cd $PWD/entryTracker
             docker-compose up -d
-            # sleep 5
-            # curl http://localhost:5000
+            sleep 5
+            curl http://localhost:5000
 
       - name: configure aws credentials
         run: |
