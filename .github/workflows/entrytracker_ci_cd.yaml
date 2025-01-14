@@ -72,13 +72,10 @@ jobs:
       - name: Run the application in the background
         run: |
           docker-compose up -d
-          sleep 5
-          curl http://localhost:5000
-
-      # - name: Run curl tests
-      #   run: |
-      #     sleep 50
-      #     curl http://localhost:5000
+      - name: Run curl tests
+        run: |
+          sleep 50
+          curl http://localhost:80
       # Push the artifact to AWS ECR registry
       # step 1: Configure AWS credentials
       - name: configure aws credentials

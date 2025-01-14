@@ -1,6 +1,5 @@
 
 #!/bin/bash
-
         id: increment_version
           git fetch --tags
           latest_tag=$(git tag --sort=-v:refname | head -n 1)
