@@ -7,91 +7,94 @@ on:
 permissions:
   contents: write
 jobs:
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  #     - name: Get the latest tag from the repository and increment patch version
-  #       id: increment_version
-  #       run: |
-  #         # Fetch tags from the main branch
-  #         git fetch --tags
-  #         latest_tag=$(git tag --sort=-v:refname | head -n 1)
-  #         new_tag=${latest_tag:-v1.0.0}
-  #         new_tag=${new_tag#v}  # Remove 'v' if present
-  #         IFS='.' read -r major minor patch <<< "$new_tag"
-  #         patch=$((patch + 1))
-  #         new_tag="${major}.${minor}.${patch}"
-  #         echo "New version tag: $new_tag"
-  #         echo "::set-output name=new_tag::$new_tag"
-  #     - name: Set up python 3.10
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: '3.10'
-  #     - name: Install dependencies
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         pip install -r requirements.txt
-  #     #Run the application (outside of a container)
-  #     - name: Run the application on port 5000 in the background
-  #       run: |
-  #         nohup python app.py &
-  #     - name: Run tests
-  #       run: |
-  #         curl http://localhost:5000
-  #       # Find the process using port 5000 and kill it
-  #     - name: Kill the process using port 5000
-  #       run: |
-  #         sudo lsof -t -i:5000 | xargs kill -9
-  #     - name: install docker and docker-compose
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y docker-compose
-  #     # Package the application
-  #     - name: Build Docker image using new_tag output
-  #       run: docker build -t entry-tracker:${{ steps.increment_version.outputs.new_tag }} .
+      - name: Get the latest tag from the repository and increment patch version
+        id: increment_version
+        run: |
+          # Fetch tags from the main branch
+          git fetch --tags
+          latest_tag=$(git tag --sort=-v:refname | head -n 1)
+          new_tag=${latest_tag:-v1.0.0}
+          new_tag=${new_tag#v}  # Remove 'v' if present
+          IFS='.' read -r major minor patch <<< "$new_tag"
+          patch=$((patch + 1))
+          new_tag="${major}.${minor}.${patch}"
+          echo "New version tag: $new_tag"
+          echo "::set-output name=new_tag::$new_tag"
+      - name: Set up python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      #Run the application (outside of a container)
+      - name: Run the application on port 5000 in the background
+        run: |
+          nohup python app.py &
+      - name: Run tests
+        run: |
+          curl http://localhost:5000
+        # Find the process using port 5000 and kill it
+      - name: Kill the process using port 5000
+        run: |
+          sudo lsof -t -i:5000 | xargs kill -9
+      - name: install docker and docker-compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+      # Package the application
+      - name: Build Docker image using new_tag output
+        run: docker build -t entry-tracker:${{ steps.increment_version.outputs.new_tag }} .
 
-  #     - name: Set up Git user and Permission to push the new tag => (Private repository)
-  #       run: |
-  #         git config --global user.email "GITHUB_ACTOR}@users.noreply.github.com"
-  #         git config --global user.name "${GITHUB_ACTOR}"
-  #         git config --global push.default simple
-  #         git checkout main
-  #     - name: Create a new tag
-  #       run: git tag -a ${{ steps.increment_version.outputs.new_tag }} -m "version ${{ steps.increment_version.outputs.new_tag }}"
+      - name: Set up Git user and Permission to push the new tag => (Private repository)
+        run: |
+          git config --global user.email "GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global push.default simple
+          git checkout main
+      - name: Create a new tag
+        run: git tag -a ${{ steps.increment_version.outputs.new_tag }} -m "version ${{ steps.increment_version.outputs.new_tag }}"
 
-  #     - name: Push the new tag
-  #       run: |
-  #         # Push the new tag to the remote repository
-  #         git push origin "${{ steps.increment_version.outputs.new_tag }}"
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push the new tag
+        run: |
+          # Push the new tag to the remote repository
+          git push origin "${{ steps.increment_version.outputs.new_tag }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - name: Run the application in the background
-  #       run: |
-  #         docker-compose up -d
-  #     - name: Run curl tests
-  #       run: |
-  #         sleep 50
-  #         curl http://localhost:5000
-  #     # Push the artifact to AWS ECR registry
-  #     # step 1: Configure AWS credentials
-  #     - name: configure aws credentials
-  #       run: aws configure set aws_access_key_id ${{ secrets.ECR_ACCESS_KEY }} && aws configure set aws_secret_access_key ${{ secrets.ECR_SECRET_KEY }} && aws configure set region ${{ secrets.AWS_REGION }}
+      - name: Run the application in the background
+        run: |
+          docker-compose up -d
+          sleep 5
+          curl http://localhost:5000
 
-  #     # step 2: Authenticate Docker to AWS ECR registry
-  #     - name: Authenticate Docker to AWS ECR
-  #       run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
+      # - name: Run curl tests
+      #   run: |
+      #     sleep 50
+      #     curl http://localhost:5000
+      # Push the artifact to AWS ECR registry
+      # step 1: Configure AWS credentials
+      - name: configure aws credentials
+        run: aws configure set aws_access_key_id ${{ secrets.ECR_ACCESS_KEY }} && aws configure set aws_secret_access_key ${{ secrets.ECR_SECRET_KEY }} && aws configure set region ${{ secrets.AWS_REGION }}
 
-  #     # step 3: Tag Docker image using new_tag output
-  #     - name: Tag Docker image using new_tag output
-  #       run: docker tag entry-tracker:${{ steps.increment_version.outputs.new_tag }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
+      # step 2: Authenticate Docker to AWS ECR registry
+      - name: Authenticate Docker to AWS ECR
+        run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
 
-  #     # step 4: Push Docker image to ECR
-  #     - name: Push Docker image to ECR registry using new_tag output
-  #       run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
+      # step 3: Tag Docker image using new_tag output
+      - name: Tag Docker image using new_tag output
+        run: docker tag entry-tracker:${{ steps.increment_version.outputs.new_tag }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
+
+      # step 4: Push Docker image to ECR
+      - name: Push Docker image to ECR registry using new_tag output
+        run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/prod/entry-tracker:${{ steps.increment_version.outputs.new_tag }}
 
   deploy:
     runs-on: ubuntu-latest
