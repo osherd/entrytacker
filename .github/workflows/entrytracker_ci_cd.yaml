@@ -12,6 +12,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Get the latest tag from the repository and increment patch version
+        id: increment_version
+        run: |
+          # Fetch tags from the main branch
+          git fetch --tags
+          latest_tag=$(git tag --sort=-v:refname | head -n 1)
+          new_tag=${latest_tag:-v1.0.0}
+          new_tag=${new_tag#v}  # Remove 'v' if present
+          IFS='.' read -r major minor patch <<< "$new_tag"
+          patch=$((patch + 1))
+          new_tag="${major}.${minor}.${patch}"
+          echo "New version tag: $new_tag"
+          echo "::set-output name=new_tag::$new_tag"
       - name: Set up python 3.10
         uses: actions/setup-python@v2
         with:
@@ -70,11 +84,6 @@ jobs:
       # step 2: Authenticate Docker to AWS ECR registry
       - name: Authenticate Docker to AWS ECR
         run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
-
-      - name: Automatic Tagging
-        id: increment-git-tag
-        run: |
-          bash ./build/git_update_version.sh -v patch
 
       # step 3: Tag Docker image using new_tag output
       - name: Tag Docker image using new_tag output
