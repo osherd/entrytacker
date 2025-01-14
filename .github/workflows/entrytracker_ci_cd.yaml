@@ -140,8 +140,7 @@ jobs:
         with:
           script: |
             echo "check is app availability..."
-            curl -f http:{{secrets.EC2_HOST}} || exit 1
-
+            curl -f http://{{secrets.EC2_HOST}} || exit 1
       # - name: configure aws credentials
       #   run: |
       #     aws configure set aws_access_key_id ${{ secrets.ECR_ACCESS_KEY }} && aws configure set aws_secret_access_key ${{ secrets.ECR_SECRET_KEY }} && aws configure set region ${{ secrets.AWS_REGION }}
